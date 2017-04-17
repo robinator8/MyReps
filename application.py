@@ -31,69 +31,8 @@ Session(app)
 db = SQL("sqlite:///finance.db")
 
 @app.route("/")
-@login_required
-def index():
-    
-    stocks = db.execute("SELECT * FROM history WHERE user_id = :id GROUP BY symbol", id=session["user_id"])
-    cash = db.execute("SELECT cash from users WHERE id = :id", id=session["user_id"])
-    total = cash[0]["cash"]
-
-    for i, stock in enumerate(stocks):
-        quote = lookup(stock["symbol"])
-        stock["name"] = quote["name"]
-        stock["price"] = quote["price"]
-        stock["shares"] = db.execute("SELECT SUM(shares) FROM history WHERE user_id = :id AND symbol = :symbol", id=session["user_id"], symbol=stock["symbol"])[0]["SUM(shares)"]
-        stock["total"] =  stock["shares"] * quote["price"]
-        total += stock["total"]
-        stock["total"] = usd(stock["total"])
-        
-    for i, stock in enumerate(stocks):
-        if stock["shares"] == 0:
-            del(stocks[i])
-            
-        
-    print(stocks)
-    return render_template("index.html", stocks=stocks, total=usd(total), cash=usd(cash[0]["cash"]))
-
-@app.route("/buy", methods=["GET", "POST"])
-@login_required
-def buy():
-    if request.method == "POST":
-        if not request.form.get("symbol"):
-            return apology("Missing symbol!")
-        elif not request.form.get("shares"):
-            return apology("Missing shares!")
-        
-        quote = lookup(request.form.get("symbol"))
-        
-        shares = int(request.form.get("shares"))
-        
-        if not quote:
-            return apology("Invalid symbol")
-        if not shares > 0:
-            return apology("Invalid shares")
-        
-        cash = db.execute("SELECT cash FROM users WHERE id = :id", id=session["user_id"])
-        
-        if cash[0]["cash"] < quote["price"] * shares:
-            return apology("Not enough money")
-        
-        db.execute("UPDATE users SET cash = cash - :price WHERE id = :id", price=quote["price"] * shares, id=session["user_id"])
-        
-        db.execute("INSERT INTO history (user_id, symbol, shares, price) VALUES (:user_id, :symbol, :shares, :price)", user_id=session["user_id"], symbol=quote["symbol"], shares=shares, price=quote["price"])
-        
-        return redirect(url_for("index"))
-    else:
-        return render_template("buy.html")
-
-@app.route("/history")
-@login_required
-def history():
-    """Show history of transactions."""
-    stocks = db.execute("SELECT * FROM history WHERE user_id = :id", id=session["user_id"])
-
-    print(stocks)
-    return render_template("history.html", stocks=stocks)
+def index():   
+   return render_template("index.html")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -140,24 +79,6 @@ def logout():
     # redirect user to login form
     return redirect(url_for("login"))
 
-@app.route("/quote", methods=["GET", "POST"])
-@login_required
-def quote():
-    """Get stock quote."""
-    
-    if request.method == "POST":
-        if not request.form.get("symbol"):
-            return apology("Missing symbol!")
-        
-        quote = lookup(request.form.get("symbol"))
-        
-        if not quote:
-            return apology("Invalid Symbol")
-            
-        return render_template("quoted.html", name=quote["name"], symbol=quote["symbol"], price=quote["price"])
-    else:
-        return render_template("quote.html")
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
     # forget any user_id
@@ -180,7 +101,6 @@ def register():
         if request.form.get("password") != request.form.get("confirmation"):
             return apology("password and conformation password didn't match")
             
-            
         hash = pwd_context.encrypt(request.form.get("password"))    
         
         result = db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", username=request.form.get("username"), hash=hash)
@@ -199,58 +119,3 @@ def register():
     # else if user reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("register.html")
-
-@app.route("/sell", methods=["GET", "POST"])
-@login_required
-def sell():
-    if request.method == "POST":
-        if not request.form.get("symbol"):
-            return apology("Missing symbol!")
-        elif not request.form.get("shares"):
-            return apology("Missing shares!")
-        
-        quote = lookup(request.form.get("symbol"))
-        
-        shares = -int(request.form.get("shares"))
-        
-        if not quote:
-            return apology("Invalid symbol")
-        if not shares < 0:
-            return apology("Invalid shares")
-        
-        stock = db.execute("SELECT SUM(shares) FROM history WHERE user_id = :id AND symbol = :symbol", id=session["user_id"], symbol=quote["symbol"])[0]["SUM(shares)"]
-        
-        if not stock:
-            return apology("You don't own this stock!")
-        
-        if shares + stock < 0:
-            return apology("You don't have that many shares!")
-        
-        db.execute("UPDATE users SET cash = cash - :price WHERE id = :id", price=quote["price"] * shares, id=session["user_id"])
-        
-        db.execute("INSERT INTO history (user_id, symbol, shares, price) VALUES (:user_id, :symbol, :shares, :price)", user_id=session["user_id"], symbol=quote["symbol"], shares=shares, price=quote["price"])
-        
-        return redirect(url_for("index"))
-    else:
-        return render_template("sell.html")
-
-
-@app.route("/cash", methods=["GET", "POST"])
-@login_required
-def cash():
-    """Get stock quote."""
-    
-    if request.method == "POST":
-        if not request.form.get("cash"):
-            return apology("Missing amount!")
-        
-        cash = int(request.form.get("cash"))
-        
-        if cash > 1000000 or cash < 0:
-            return apology("Cash must be a positive integer less than 1 million")
-            
-        db.execute("UPDATE users SET cash = cash + :add WHERE id = :id", add=cash, id=session["user_id"])    
-        
-        return redirect(url_for("index"))
-    else:
-        return render_template("cash.html")
