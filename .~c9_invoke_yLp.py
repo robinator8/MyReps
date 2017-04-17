@@ -27,8 +27,6 @@ Session(app)
 # configure CS50 Library to use SQLite database
 db = SQL("sqlite:///reps.db")
 
-@app.route("/home")
-@app.route("/index")
 @app.route("/")
 def index():   
    return render_template("index.html")
