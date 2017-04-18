@@ -118,3 +118,20 @@ def register():
     # else if user reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("register.html")
+
+@app.route("/add_party", methods=["GET", "POST"])
+@login_required
+def add_party():
+    if request.method == "POST":
+        if not request.form.get.("party"):
+            return apology("Empty Party")
+        
+        rows = db.execute("SELECT title FROM party WHERE title = :title", title=request.form.get("party"))
+
+        if len(rows):
+            return apology("That Party is already added!")
+
+        return render_template("index.html")
+
+    else:
+        return render_template("add_party.html")
