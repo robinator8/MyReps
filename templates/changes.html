@@ -1,0 +1,169 @@
+{% extends "layout.html" %} {% block title %} Changes {% endblock %} {% block main %}
+
+<div class="panel-group"> 
+    <!-- Start of Parties -->
+    <div class="panel panel-default">
+            
+        <div class="panel-heading panel-main" data-toggle="collapse" data-target="#parties">
+            <h3 class="panel-title">Parties</h3>
+        </div>
+            
+        <div id="parties" class="panel-collapse collapse">
+            <div class="panel panel-default panel-side">
+                    <div class="panel-heading" data-toggle="collapse" data-target="#list-parties">
+                        <h4 class="panel-title">
+                            Current Parties
+                        </h4>
+                    </div>
+                    <div id="list-parties" class="panel-collapse collapse">
+                        <ul class="list-group">
+                            {% for party in parties %}
+                            <li class="list-group-item">{{ party.party }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+            <div class="panel panel-default panel-side">
+                    <form action="{{ url_for('add_party') }}" method="post">
+                        
+                            <div class="form-group form-inline">
+                                <input autocomplete="off" autofocus class="form-control" name="add_party" placeholder="Add Party" type="text" />
+                            </div>
+                            <div class="form-group form-inline">
+                                <button class="btn btn-default" type="submit">Add</button>
+                            </div>
+                        
+                    </form>
+                </div>
+                
+            <div class="panel panel-default panel-side">
+                    <form action="{{ url_for('del_party') }}" method="post">
+                        
+                            <div class="form-group form-inline">
+                                <select autofocus class="form-control" name="del_party" type="text">
+                                    <option selected>Delete Party</option>
+                                    {% for party in parties %}
+                                    <option value="{{ party.party }}">{{ party.party }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group form-inline">
+                                <button class="btn btn-default" type="submit">Delete</button>
+                            </div>
+                        
+                    </form>
+                </div>
+                
+        </div>
+    </div>
+    <!-- Start of Areas -->    
+    <div class="panel panel-default">
+            
+        <div class="panel-heading panel-main" data-toggle="collapse" data-target="#areas">
+            <h3 class="panel-title">Areas</h3>
+        </div>
+            
+        <div id="areas" class="panel-collapse collapse">
+            <div class="panel panel-default panel-side">
+                <div class="panel-heading" data-toggle="collapse" data-target="#list-areas">
+                    <h4 class="panel-title">Current Areas</h4>
+                </div>
+                <div id="list-areas" class="panel-collapse collapse">
+                    <ul class="list-group">
+                        {% for area in areas %}
+                        <li class="list-group-item">{{ area.area }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="panel panel-default panel-side">
+                <form action="{{ url_for('add_area') }}" method="post">
+                    
+                        <div class="form-group form-inline">
+                            <input autocomplete="off" autofocus class="form-control" name="add_area" placeholder="Add Area" type="text" />
+                        </div>
+                        <div class="form-group form-inline">
+                            <button class="btn btn-default" type="submit">Add</button>
+                        </div>
+                        
+                </form>
+            </div>
+                
+            <div class="panel panel-default panel-side">
+                <form action="{{ url_for('del_area') }}" method="post">
+                    
+                        <div class="form-group form-inline">
+                            <select autofocus class="form-control" name="del_area" type="text">
+                                <option selected><span id="default-option">Delete Area</span></option>
+                                {% for area in areas %}
+                                <option value="{{ area.area }}">{{ area.area }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group form-inline">
+                            <button class="btn btn-default" type="submit">Delete</button>
+                        </div>
+                    
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Start of Scales -->
+    <div class="panel panel-default">
+            
+        <div class="panel-heading panel-main" data-toggle="collapse" data-target="#scales">
+            <h3 class="panel-title">Scales</h3>
+        </div>
+            
+        <div id="scales" class="panel-collapse collapse">
+            <div class="panel panel-default panel-side">
+                <div class="panel-heading" data-toggle="collapse" data-target="#list-scales">
+                    <h4 class="panel-title">Current Scales</h4>
+                </div>
+                <div id="list-scales" class="panel-collapse collapse">
+                    <ul class="list-group">
+                        {% for scale in scales %}
+                        <li class="list-group-item">{{ scale.scale }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="panel panel-default panel-side">
+                <form action="{{ url_for('add_scale') }}" method="post">
+                    
+                        <div class="form-group form-inline">
+                            <input autocomplete="off" autofocus class="form-control" name="add_scale" placeholder="Add Scale" type="text" />
+                        </div>
+                        <div class="form-group form-inline">
+                            <button class="btn btn-default" type="submit">Add</button>
+                        </div>
+                        
+                </form>
+            </div>
+                
+            <div class="panel panel-default panel-side">
+                <form action="{{ url_for('del_scale') }}" method="post">
+                    
+                        <div class="form-group form-inline">
+                            <select autofocus class="form-control" name="del_scale" type="text">
+                                <option selected><span id="default-option">Delete Scale</span></option>
+                                {% for scale in scales %}
+                                <option value="{{ scale.scale }}">{{ scale.scale }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group form-inline">
+                            <button class="btn btn-default" type="submit">Delete</button>
+                        </div>
+                    
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

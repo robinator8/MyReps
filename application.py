@@ -52,7 +52,10 @@ def login():
             return apology("must provide password")
 
         # query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = :username", username=request.form.get("username"))
+        
+        username = request.form.get("username").lower()
+        
+        rows = db.execute("SELECT * FROM users WHERE lower(username) = :username", username=username)
 
         # ensure username exists and password is correct
         if len(rows) != 1 or not pwd_context.verify(request.form.get("password"), rows[0]["hash"]):
@@ -102,12 +105,18 @@ def register():
             
         hash = pwd_context.encrypt(request.form.get("password"))    
         
-        result = db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", username=request.form.get("username"), hash=hash)
+        username = request.form.get("username")
         
-        if not result:
+        rows = db.execute("SELECT * FROM users WHERE lower(username) = :username", username=username.lower())
+        if rows:
             return apology("Username taken")
         
-        rows = db.execute("SELECT * FROM users WHERE username = :username", username=request.form.get("username"))
+        rows = db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", username=username, hash=hash)
+        
+        if not rows:
+            return apology("Username taken")
+        
+        rows = db.execute("SELECT * FROM users WHERE lower(username) = :username", username=username.lower())
         
         # remember which user has logged in
         session["user_id"] = rows[0]["id"]
@@ -123,15 +132,115 @@ def register():
 @login_required
 def add_party():
     if request.method == "POST":
-        if not request.form.get.("party"):
+        if not request.form.get("add_party"):
             return apology("Empty Party")
         
-        rows = db.execute("SELECT title FROM party WHERE title = :title", title=request.form.get("party"))
+        rows = db.execute("SELECT party FROM parties WHERE party = :party", party=request.form.get("add_party"))
 
         if len(rows):
             return apology("That Party is already added!")
-
-        return render_template("index.html")
+        
+        db.execute("INSERT INTO parties (party) VALUES (:party)", party=request.form.get("add_party"))
+        return changes()
 
     else:
-        return render_template("add_party.html")
+        return changes()
+
+@app.route("/del_party", methods=["GET", "POST"])
+@login_required
+def del_party():
+    if request.method == "POST":
+        if not request.form.get("del_party"):
+            return apology("Empty Party")
+        
+        rows = db.execute("SELECT party FROM parties WHERE party = :party", party=request.form.get("del_party"))
+
+        if not len(rows):
+            return apology("That Party doesn't exist!")
+        
+        db.execute("DELETE FROM parties WHERE party = :party", party=request.form.get("del_party"))
+        return changes()
+
+    else:
+        return changes()
+
+@app.route("/add_area", methods=["GET", "POST"])
+@login_required
+def add_area():
+    if request.method == "POST":
+        if not request.form.get("add_area"):
+            return apology("Empty Area")
+        
+        rows = db.execute("SELECT area FROM areas WHERE area = :area", area=request.form.get("add_area"))
+
+        if len(rows):
+            return apology("That Party is already added!")
+        
+        db.execute("INSERT INTO areas (area) VALUES (:area)", area=request.form.get("add_area"))
+        return changes()
+
+    else:
+        return changes()
+
+@app.route("/del_area", methods=["GET", "POST"])
+@login_required
+def del_area():
+    if request.method == "POST":
+        if not request.form.get("del_area"):
+            return apology("Empty Area")
+        
+        rows = db.execute("SELECT area FROM areas WHERE area = :area", area=request.form.get("del_area"))
+
+        if not len(rows):
+            return apology("That Area doesn't exist!")
+        
+        db.execute("DELETE FROM areas WHERE area = :area", area=request.form.get("del_area"))
+        return changes()
+
+    else:
+        return changes()
+
+@app.route("/add_scale", methods=["GET", "POST"])
+@login_required
+def add_scale():
+    if request.method == "POST":
+        
+        if not request.form.get("add_scale"):
+            return apology("Empty Scale")
+        
+        rows = db.execute("SELECT scale FROM scales WHERE scale = :scale", scale=request.form.get("add_scale"))
+
+        if len(rows):
+            return apology("That Party is already added!")
+        
+        db.execute("INSERT INTO scales (scale) VALUES (:scale)", scale=request.form.get("add_scale"))
+        return changes()
+
+    else:
+        return changes()
+
+@app.route("/del_scale", methods=["GET", "POST"])
+@login_required
+def del_scale():
+    if request.method == "POST":
+        if not request.form.get("del_scale"):
+            return apology("Empty Scale")
+        
+        rows = db.execute("SELECT scale FROM scales WHERE scale = :scale", scale=request.form.get("del_scale"))
+
+        if not len(rows):
+            return apology("That Scale doesn't exist!")
+        
+        db.execute("DELETE FROM scales WHERE scale = :scale", scale=request.form.get("del_scale"))
+        return changes()
+
+    else:
+        return changes()
+
+@app.route("/changes", methods=["GET", "POST"])
+@login_required
+def changes():
+    scales = db.execute("SELECT scale FROM scales")
+    parties = db.execute("SELECT party FROM parties")
+    areas = db.execute("SELECT area FROM areas")
+    return render_template("changes.html", parties=parties, areas=areas, scales=scales)
