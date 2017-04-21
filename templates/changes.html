@@ -163,6 +163,115 @@
             </div>
         </div>
     </div>
+    <!-- Start of Positions  -->
+    <div class="panel panel-default">
+            
+        <div class="panel-heading panel-main" data-toggle="collapse" data-target="#positions">
+            <h3 class="panel-title">Positions</h3>
+        </div>
+            
+        <div id="positions" class="panel-collapse collapse">
+            <div class="panel panel-default">
+                <div class="panel-heading" data-toggle="collapse" data-target="#list-positions">
+                    <h4 class="panel-title">Current Positions</h4>
+                </div>
+                <div id="list-positions" class="panel-collapse collapse">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <td>Title</td>
+                                <td>Link</td>
+                                <td>Term Length</td>
+                                <td>Term Limit</td>
+                                <td>Description</td>
+                                <td>Scale</td>
+                                <td>Area</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for position in positions %}
+                            <tr>
+                                <td>{{ position.title }}</td>
+                                <td><a href="{{ position.link }}">{{ position.link }}</a></td>
+                                <td>{{ position.term_length }}</td>
+                                <td>{{ position.term_limit }}</td>
+                                <td>{{ position.description }}</td>
+                                <td>{{ position.scale }}</td>
+                                <td>{{position.area }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <form action="{{ url_for('change_position') }}" method="post">
+                    
+                    <div class="form-group form-inline form-medium">
+                        <select autofocus class="form-control" name="position_edit" type="text">
+                            <option selected value="add">Add</option>
+                            <option value="delete">Delete</option>
+                            <option value="edit">Edit</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group form-inline form-medium">
+                        <select autofocus class="form-control" name="position" type="text">
+                            <option selected>Select Position</option>
+                            <option value="new">New</option>
+                            {% for position in positions %}
+                            <option value="{{ position.title }}">{{ position.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group form-inline form-small">
+                        <input autocomplete="off" autofocus class="form-control" name="position_title" placeholder="Title" type="text" />
+                    </div>
+                    
+                    <div class="form-group form-inline form-small">
+                        <input autocomplete="off" autofocus class="form-control" name="position_link" placeholder="Link" type="url" />
+                    </div>
+                    
+                    <div class="form-group form-inline form-small">
+                        <input autocomplete="off" autofocus class="form-control" name="position_length" placeholder="Term Length (0 = Lifetime)" type="number" min="0"/>
+                    </div>
+                    
+                    <div class="form-group form-inline form-small">
+                        <input autocomplete="off" autofocus class="form-control" name="position_limit" placeholder="Term Limit (0 = None)" type="number" min="0"/>
+                    </div>
+                    
+                    <div class="form-group form-inline form-large">
+                        <textarea class="form-control" name="position_description" rows="1" placeholder="Description" type="text"></textarea>
+                    </div>
+                    
+                    <div class="form-group form-inline form-medium">
+                        <select autofocus class="form-control" name="position_scale" type="text">
+                            <option selected>Select Scale</option>
+                            {% for scale in scales %}
+                            <option value="{{ scale.id }}">{{ scale.scale }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group form-inline form-medium">
+                        <select autofocus class="form-control" name="position_area" type="text">
+                            <option selected>Select Area</option>
+                            {% for area in areas %}
+                            <option value="{{ area.id }}">{{ area.area }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group form-inline form-large">
+                        <button class="btn btn-default" type="submit">Submit</button>
+                    </div>
+                        
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 

@@ -96,3 +96,26 @@ form {
 select.form-control {
     max-width: 100%;
 }
+
+.form-group.form-inline.form-small {
+    width: 24.62%;
+}
+
+.form-group.form-inline.form-medium {
+    width: 49.5%;
+}
+
+.form-inline .form-control {
+    width: 100%;
+}
+
+.form-group.form-inline.form-large {
+    width: 99.3%;
+}
+
+textarea {
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
+    resize:vertical;
+}

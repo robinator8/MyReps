@@ -237,10 +237,36 @@ def del_scale():
     else:
         return changes()
 
-@app.route("/changes", methods=["GET", "POST"])
+@app.route("/edit_position", methods=["GET", "POST"])
+@login_required
+def change_position():
+    if request.method == "POST":
+        print(request.form.get("position_edit"))
+        if request.form.get("position_edit") == "add":
+            db.execute("INSERT INTO positions (title, scale_id, area_id, link, term_length, term_limit, description) VALUES (:title, :scale_id, :area_id, :link, :term_length, :term_limit, :description)", title=title, scale_id=scale_id, area_id=area_id, link=link, term_length=term_length, term_limit=term_limit, description=description)
+        elif request.form.get("position_edit") == "delete":
+            print("Delete")
+        elif request.form.get("position_edit") == "edit":
+            print("Edit")
+        else:
+            return apology("Edit Type Error")
+        return changes()
+    else:
+        return changes()
+
+@app.route("/changes", methods=["GET"])
 @login_required
 def changes():
-    scales = db.execute("SELECT scale FROM scales")
-    parties = db.execute("SELECT party FROM parties")
-    areas = db.execute("SELECT area FROM areas")
-    return render_template("changes.html", parties=parties, areas=areas, scales=scales)
+    positions = db.execute("SELECT title, link, term_length, term_limit, description, scales.scale, areas.area FROM positions LEFT JOIN scales ON positions.scale_id = scales.id LEFT JOIN areas ON positions.area_id = areas.id")
+    
+    for p in positions:
+        if not p["term_limit"]:
+            p["term_limit"] = "None"
+        if not p["term_length"]:
+            p["term_length"] = "Lifetime"
+            
+    
+    scales = db.execute("SELECT * FROM scales")
+    parties = db.execute("SELECT * FROM parties")
+    areas = db.execute("SELECT * FROM areas")
+    return render_template("changes.html", parties=parties, areas=areas, scales=scales, positions=positions)
