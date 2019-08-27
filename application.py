@@ -30,8 +30,33 @@ db = SQL("sqlite:///reps.db")
 @app.route("/home")
 @app.route("/index")
 @app.route("/")
-def index():   
-   return render_template("index.html")
+def index():
+    rows = db.execute("SELECT officials.name, officials.term_start, officials.position_id, positions.title, positions.link, positions.term_length, positions.term_limit, positions.description,  parties.party, scales.scale, areas.area FROM officials LEFT JOIN positions ON officials.position_id = positions.id LEFT JOIN parties ON officials.party_id = parties.id LEFT JOIN areas ON positions.area_id = areas.id LEFT JOIN scales ON positions.scale_id = scales.id ORDER BY scale_id, officials.position_id, officials.name")
+    for row in rows:
+        if not row["term_limit"]:
+            row["term_limit"] = "None"
+        if not row["term_length"]:
+            row["term_length"] = "Lifetime"
+        check = db.execute("SELECT * FROM officials WHERE position_id = :position_id ORDER BY name", position_id=row["position_id"])
+        if check[0]["name"] == row["name"]:
+            row["count"] = len(check)
+        else:
+            row["count"] = 0
+        
+        
+    scales = {}
+    for row in rows:
+        if not row["scale"] in scales:
+            scales[row["scale"]] = {}
+            
+        if not row["area"] in scales[row["scale"]]:
+            scales[row["scale"]][row["area"]] = []
+        
+        scales[row["scale"]][row["area"]].append({"name" : row["name"], "title" : row["title"], "description" : row["description"], "title" : row["title"], "term_limit" : row["term_limit"], "term_length" : row["term_length"], "party" : row["party"], "term_start" : row["term_start"], "link" : row["link"], "count" : row["count"]})
+    
+    print(scales)
+    
+    return render_template("index.html", scales=scales)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -241,15 +266,111 @@ def del_scale():
 @login_required
 def change_position():
     if request.method == "POST":
-        print(request.form.get("position_edit"))
-        if request.form.get("position_edit") == "add":
-            db.execute("INSERT INTO positions (title, scale_id, area_id, link, term_length, term_limit, description) VALUES (:title, :scale_id, :area_id, :link, :term_length, :term_limit, :description)", title=title, scale_id=scale_id, area_id=area_id, link=link, term_length=term_length, term_limit=term_limit, description=description)
-        elif request.form.get("position_edit") == "delete":
-            print("Delete")
-        elif request.form.get("position_edit") == "edit":
-            print("Edit")
+        edit = request.form.get("position_edit")
+        position = request.form.get("position")
+        fields = { "title" : request.form.get("position_title"),
+                   "scale_id" : request.form.get("position_scale"),
+                   "area_id" : request.form.get("position_area"),
+                   "link" : request.form.get("position_link"),
+                   "term_length" : request.form.get("position_length"),
+                   "term_limit" : request.form.get("position_limit"),
+                   "description" : request.form.get("position_description")}
+        
+        if edit == "add":
+            
+            for key, field in fields.items():
+                if not field:
+                    return apology("Empty " + key)
+             
+            rows = db.execute("INSERT INTO positions (title, scale_id, area_id, link, term_length, term_limit, description) VALUES (:title, :scale_id, :area_id, :link, :term_length, :term_limit, :description)", 
+                               title=fields["title"], scale_id=fields["scale_id"], area_id=fields["area_id"], link=fields["link"], term_length=fields["term_length"], term_limit=fields["term_limit"], description=fields["description"])
+            if not rows:
+                return apology("Error inserting")
+                
+        elif edit == "delete":
+            if not position or position == "default" or position == "new":
+                return apology("Empty Position")
+            
+            rows = db.execute("SELECT * FROM positions WHERE id = :id", id=position)
+    
+            if not len(rows):
+                return apology("That Position doesn't exist!")
+            
+            db.execute("DELETE FROM positions WHERE id = :id", id=position)
+                
+        elif edit == "edit":
+            if not position or position == "default" or position == "new":
+                return apology("Empty Position")
+        
+            rows = db.execute("SELECT * FROM positions WHERE id = :id", id=position)
+    
+            if not len(rows):
+                return apology("That Position doesn't exist!")
+            
+            for key, field in fields.items():
+                if ((key == "scale_id" or key == "area_id") and ("Select" in field)):
+                    continue
+                if field:
+                    db.execute("UPDATE positions SET :key = :field WHERE id = :id", key=key, id=position, field=field)
+                
         else:
             return apology("Edit Type Error")
+            
+        return changes()
+    else:
+        return changes()
+
+@app.route("/edit_official", methods=["GET", "POST"])
+@login_required
+def change_official():
+    if request.method == "POST":
+        edit = request.form.get("official_edit")
+        official = request.form.get("official")
+        fields = { "name" : request.form.get("official_name"),
+                   "position_id" : request.form.get("official_position"),
+                   "party_id" : request.form.get("official_party"),
+                   "term_start" : request.form.get("official_start")}
+        print(official)
+        if edit == "add":
+            
+            for key, field in fields.items():
+                if not field:
+                    return apology("Empty " + key)
+             
+            rows = db.execute("INSERT INTO officials (name, position_id, party_id, term_start) VALUES (:name, :position_id, :party_id, :term_start)", 
+                               name=fields["name"], position_id=fields["position_id"], party_id=fields["party_id"], term_start=fields["term_start"])
+            if not rows:
+                return apology("Error inserting")
+                
+        elif edit == "delete":
+            if not official or official == "default" or official == "new":
+                return apology("Empty Official")
+            
+            rows = db.execute("SELECT * FROM officials WHERE name = :name", name=official)
+    
+            if not len(rows):
+                return apology("That official doesn't exist!")
+            
+            db.execute("DELETE FROM officials WHERE name = :name", name=official)
+                
+        elif edit == "edit":
+            if not official or official == "default" or official == "new":
+                return apology("Empty Official")
+        
+            rows = db.execute("SELECT * FROM officials WHERE name = :name", name=official)
+    
+            if not len(rows):
+                return apology("That official doesn't exist!")
+            
+            for key, field in fields.items():
+                if ((key == "party_id" or key == "position_id") and ("Select" in field)):
+                    continue
+                if field:
+                    db.execute("UPDATE officials SET :key = :field WHERE name = :name", key=key, name=official, field=field)
+                
+        else:
+            return apology("Edit Type Error")
+            
         return changes()
     else:
         return changes()
@@ -257,8 +378,9 @@ def change_position():
 @app.route("/changes", methods=["GET"])
 @login_required
 def changes():
-    positions = db.execute("SELECT title, link, term_length, term_limit, description, scales.scale, areas.area FROM positions LEFT JOIN scales ON positions.scale_id = scales.id LEFT JOIN areas ON positions.area_id = areas.id")
+    officials = db.execute("SELECT officials.*, positions.title, parties.party FROM officials LEFT JOIN positions ON officials.position_id = positions.id LEFT JOIN parties ON officials.party_id = parties.id")
     
+    positions = db.execute("SELECT positions.*, scales.scale, areas.area FROM positions LEFT JOIN scales ON positions.scale_id = scales.id LEFT JOIN areas ON positions.area_id = areas.id")
     for p in positions:
         if not p["term_limit"]:
             p["term_limit"] = "None"
@@ -269,4 +391,4 @@ def changes():
     scales = db.execute("SELECT * FROM scales")
     parties = db.execute("SELECT * FROM parties")
     areas = db.execute("SELECT * FROM areas")
-    return render_template("changes.html", parties=parties, areas=areas, scales=scales, positions=positions)
+    return render_template("changes.html", parties=parties, areas=areas, scales=scales, positions=positions, officials=officials)

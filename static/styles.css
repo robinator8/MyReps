@@ -119,3 +119,7 @@ textarea {
     min-width: 100%;
     resize:vertical;
 }
+
+td.centered-cell {
+    vertical-align: middle;
+}

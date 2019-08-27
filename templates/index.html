@@ -1,3 +1,58 @@
 {% extends "layout.html" %} {% block title %} Home {% endblock %} {% block main %}
 <h1>My Representatives</h1>
+<div class="panel-group">
+    {% for scale, areas in scales.items() %}
+    <div class="panel panel-default">
+            
+        <div class="panel-heading panel-main" data-toggle="collapse" data-target="#{{ scale.replace(" ", "") }}">
+            <h3 class="panel-title">{{ scale.replace(" ", "") }}</h3>
+        </div>
+            
+        <div id="{{ scale }}" class="panel-collapse collapse">
+            
+            {% for area, officials in areas.items() %}
+            <div class="panel panel-default">
+                <div class="panel-heading" data-toggle="collapse" data-target="#{{ (scale + area).replace(" ", "") }}">
+                    <h4 class="panel-title">{{ area }}</h4>
+                </div>
+                
+                <div id="{{ (scale + area).replace(" ", "") }}" class="panel-collapse collapse">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <td>Name</td>
+                                <td>Party</td>
+                                <td>Term Start</td>
+                                <td>Title</td>
+                                <td>Term Length</td>
+                                <td>Term Limit</td>
+                                <td>Link</td>
+                                <td>Description</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for official in officials %}
+                            <tr>
+                                <td>{{ official.name }}</td>
+                                <td>{{ official.party }}</td>
+                                <td>{{ official.term_start }}</td>
+                                
+                                {% if official.count %}
+                                <td class="centered-cell" rowspan="{{ official.count }}">{{ official.title }}</td>
+                                <td rowspan="{{ official.count }}">{{ official.term_length }}</td>
+                                <td rowspan="{{ official.count }}">{{ official.term_limit }}</td>
+                                <td rowspan="{{ official.count }}">{{ official.link }}</td>
+                                <td rowspan="{{ official.count }}">{{ official.description }}</td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
 {% endblock %}

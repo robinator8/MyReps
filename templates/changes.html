@@ -147,17 +147,17 @@
             <div class="panel panel-default panel-side">
                 <form action="{{ url_for('del_scale') }}" method="post">
                     
-                        <div class="form-group form-inline">
-                            <select autofocus class="form-control" name="del_scale" type="text">
-                                <option selected><span id="default-option">Delete Scale</span></option>
-                                {% for scale in scales %}
-                                <option value="{{ scale.scale }}">{{ scale.scale }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group form-inline">
-                            <button class="btn btn-default" type="submit">Delete</button>
-                        </div>
+                    <div class="form-group form-inline">
+                        <select autofocus class="form-control" name="del_scale" type="text">
+                            <option selected>Delete Scale</option>
+                            {% for scale in scales %}
+                            <option value="{{ scale.scale }}">{{ scale.scale }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group form-inline">
+                        <button class="btn btn-default" type="submit">Delete</button>
+                    </div>
                     
                 </form>
             </div>
@@ -218,10 +218,10 @@
                     
                     <div class="form-group form-inline form-medium">
                         <select autofocus class="form-control" name="position" type="text">
-                            <option selected>Select Position</option>
+                            <option selected value="default">Select Position</option>
                             <option value="new">New</option>
                             {% for position in positions %}
-                            <option value="{{ position.title }}">{{ position.title }}</option>
+                            <option value="{{ position.id }}">{{ position.title }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -260,6 +260,97 @@
                             <option selected>Select Area</option>
                             {% for area in areas %}
                             <option value="{{ area.id }}">{{ area.area }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group form-inline form-large">
+                        <button class="btn btn-default" type="submit">Submit</button>
+                    </div>
+                        
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Start of Officials -->
+    <div class="panel panel-default">
+            
+        <div class="panel-heading panel-main" data-toggle="collapse" data-target="#officials">
+            <h3 class="panel-title">Officials</h3>
+        </div>
+            
+        <div id="officials" class="panel-collapse collapse">
+            <div class="panel panel-default">
+                <div class="panel-heading" data-toggle="collapse" data-target="#list-officials">
+                    <h4 class="panel-title">Current Officials</h4>
+                </div>
+                <div id="list-officials" class="panel-collapse collapse">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <td>Name</td>
+                                <td>Position</td>
+                                <td>Party</td>
+                                <td>Term Start</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for official in officials %}
+                            <tr>
+                                <td>{{ official.name }}</td>
+                                <td>{{ official.title }}</td>
+                                <td>{{ official.party }}</td>
+                                <td>{{ official.term_start }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <form action="{{ url_for('change_official') }}" method="post">
+                    
+                    <div class="form-group form-inline form-medium">
+                        <select autofocus class="form-control" name="official_edit" type="text">
+                            <option selected value="add">Add</option>
+                            <option value="delete">Delete</option>
+                            <option value="edit">Edit</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group form-inline form-medium">
+                        <select autofocus class="form-control" name="official" type="text">
+                            <option selected value="default">Select Official</option>
+                            <option value="new">New</option>
+                            {% for official in officials %}
+                            <option value="{{ official.name }}">{{ official.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group form-inline form-medium">
+                        <input autocomplete="off" autofocus class="form-control" name="official_name" placeholder="Name" type="text" />
+                    </div>
+                    
+                    <div class="form-group form-inline form-medium">
+                        <input class="form-control" type="date" name="official_start" placeholder="Term Start">
+                    </div>
+                    
+                    <div class="form-group form-inline form-medium">
+                        <select autofocus class="form-control" name="official_position" type="text">
+                            <option selected>Select Position</option>
+                            {% for position in positions %}
+                            <option value="{{ position.id }}">{{ position.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group form-inline form-medium">
+                        <select autofocus class="form-control" name="official_party" type="text">
+                            <option selected>Select Party</option>
+                            {% for party in parties %}
+                            <option value="{{ party.id }}">{{ party.party }}</option>
                             {% endfor %}
                         </select>
                     </div>
